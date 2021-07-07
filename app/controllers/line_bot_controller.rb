@@ -14,11 +14,7 @@ class LineBotController < ApplicationController
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
-          search_and_create_message(event.message["text"])
-          message = {
-            type: "text",
-            text: event.message['text']
-          }
+           message = search_and_create_message(event.message['text'])
           client.reply_message(event['replyToken'], message)
         end
       end
@@ -47,6 +43,17 @@ class LineBotController < ApplicationController
     }
     response = http_client.get(url, query)
     response = JSON.parse(response.body)
-    p response['pagingInfo']
+
+    text = ''
+    response['hotels'].each do |hotel|
+      text <<
+        hotel[0]['hotelBasicInfo']['hotelName'] + "\n" +
+        hotel[0]['hotelBasicInfo']['hotelInformationUrl'] + "\n" +
+        "\n"
+    end
+    message = {
+      type: 'text',
+      text: text
+    }
   end
 end
